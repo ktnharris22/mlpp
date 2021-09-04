@@ -48,7 +48,7 @@ def buildDF(st,listofVars,listofVarNames):
     InsertDF = InsertDF.reset_index()
     InsertDF = InsertDF.dropna()
     print(InsertDF.dtypes)
-    InsertDF.to_csv('upload_test_data_from_copy.csv', index=False, header=True)
+    InsertDF.to_csv('upload_test_data_from_copy.csv', index=False, header=False)
     return InsertDF
 
 def connectToDB():
@@ -91,11 +91,13 @@ def createTable(conn):
         print(error)
 
 
-def InsertIntoDB(df,conn):
+def InsertIntoDB(conn):
         # create a cursor
         cur = conn.cursor()
-        for index, row in df.iterrows():
-            cur.execute(f"INSERT INTO acs.kjharris_acs_data VALUES(row[state],row[county],row[tract]);")
+        cur.execute("SET search_path TO acs,public;")
+        f = open('upload_test_data_from_copy.csv', 'r')
+        cur.copy_from(file=f, table="kjharris_acs_data", sep=",")
+
         conn.commit()
 
         # close the communication with the PostgreSQL
