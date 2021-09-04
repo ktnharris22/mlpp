@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+database.ini
+
+upload_test_data_from_copy.csv
