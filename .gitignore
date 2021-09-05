@@ -130,4 +130,4 @@ dmypy.json
 
 database.ini
 
-upload_test_data_from_copy.csv
+*.csv
