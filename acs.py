@@ -46,7 +46,6 @@ def buildDF(st, listofVars, listofVarNames):
     insert_df.to_csv('upload_data_from_copy.csv', index=False, header=False)
 
 
-
 def connectToDB():
     """ Connect to the PostgreSQL database server """
     conn = None
@@ -90,12 +89,12 @@ def createTable(conn):
         print(error)
 
 
-def insertIntoDB(conn):
+def insertIntoTable(conn):
     try:
         cur = conn.cursor()
         cur.execute("SET search_path TO acs,public;")
         f = open('upload_data_from_copy.csv', 'r')
-        print("Copying data from CSV to DB... ")
+        print("Copying data from CSV to Table... ")
         cur.copy_from(file=f, table="kjharris_acs_data", sep=",")
         cur.execute("Select COUNT(*) FROM acs.kjharris_acs_data;")
         print(f"Number of Rows inserted = {cur.fetchone()[0]}")
@@ -111,13 +110,14 @@ def main():
                 "B19013_001E"]
     varNames = ["Male", "Female", "Median_Age", "Total_Pop", "RACE_White", "RACE_Black", "RACE_Asian",
                 "HH_Median_Income"]
-    state = input("What State do you want to gather data for? Input state FIPS code. Example AL = 01")
+    state = input("What State do you want to gather data for? Input state FIPS code. Example AL = 01. ")
     buildDF(state, varCodes, varNames)
     conn = connectToDB()
     createTable(conn)
-    insertIntoDB(conn)
+    insertIntoTable(conn)
     print("Finished. Closing connection to DB.. ")
     conn.close()
+
 
 if __name__ == '__main__':
     main()
