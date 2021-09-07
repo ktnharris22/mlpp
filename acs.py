@@ -4,13 +4,12 @@ import pandas as pd
 import psycopg2
 
 
-def getData(state, variables):
+def getData(state, county, variables):
     # https://api.census.gov/data/2019/acs/acs5/groups.html -Data Key
     key = "38f005de4366d6c599049a090361753b4a05dad1"
-    print(f"Getting {variables} for {state}")
+    print(f"Getting {variables} for {state} in {county}")
     # https://api.census.gov/data/2019/acs/acs5/examples.html -API examples with varying levels of Geography
-    url = f"https://api.census.gov/data/2019/acs/acs5?get={variables}&for=block%20group:*&in=state:{state}%20county:*&key={key}"
-
+    url = f"https://api.census.gov/data/2019/acs/acs5?get={variables}&for=block%20group:*&in=state:{state}%20county:{county}&key={key}"
     return requests.get(url).json()
 
 
@@ -31,11 +30,11 @@ def getData(state, variables):
 
 # B19013_001E	Estimate!!Median household income in the past 12 months (in 2019 inflation-adjusted dollars)
 
-def buildDF(st, listofVars, listofVarNames):
+def buildDF(st, county, listofVars, listofVarNames):
     var_dict = dict(zip(listofVars, listofVarNames))
     str_vars = ",".join(listofVars)
 
-    data = getData(st, str_vars)
+    data = getData(st, county, str_vars)
     insert_df = pd.DataFrame(data, columns=data[0])
     insert_df = insert_df.convert_dtypes()
     insert_df = insert_df.rename(columns=var_dict)
@@ -110,8 +109,11 @@ def main():
                 "B19013_001E"]
     varNames = ["Male", "Female", "Median_Age", "Total_Pop", "RACE_White", "RACE_Black", "RACE_Asian",
                 "HH_Median_Income"]
-    state = input("What State do you want to gather data for? Input state FIPS code. Example AL = 01. ")
-    buildDF(state, varCodes, varNames)
+    
+    state = input("What State do you want to gather data for? Input state FIPS code. Example AL = 01. (Use * for all states) ")
+    county = input("What State do you want to gather data for? Input state FIPS code. Example 001. (Use * for all counties) ")
+
+    buildDF(state, county, varCodes, varNames)
     conn = connectToDB()
     createTable(conn)
     insertIntoTable(conn)
